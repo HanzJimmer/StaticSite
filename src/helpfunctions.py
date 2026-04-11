@@ -23,18 +23,48 @@ def extract_markdown_images(text):
     tuple_list = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return tuple_list
     
-# using regex, search for ![] and return the stuff inside as the alt_text, then search for \(w+\)
-# should return a list of tuples (alt_text, imgage_url)
-# text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
-# print(extract_markdown_images(text))
-# [("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")]
-
-
 def extract_markdown_links(text):
     tuple_list = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return tuple_list
 
-# returns list of tuples (anchor_text, url)
-# text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
-# print(extract_markdown_links(text))
-# [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")]
+def split_nodes_image(old_nodes):
+    new_nodes = []
+    for node in old_nodes:
+        if node.text_type != TextType.PLAIN_TEXT:
+            new_nodes.append(node)
+            continue
+        image_meta_data = extract_markdown_images(node.text)
+        if not image_meta_data:
+            new_nodes.append(node)
+            continue
+        next_string = node.text
+        for image in image_meta_data:
+            split_node = next_string.split(f"![{image[0]}]({image[1]})", maxsplit=1)
+            next_string = split_node[1]
+            if split_node[0] != "":
+                new_nodes.append(TextNode(split_node[0], TextType.PLAIN_TEXT))
+            new_nodes.append(TextNode(image[0], TextType.IMAGE, image[1]))
+        if next_string and next_string != "":
+            new_nodes.append(TextNode(next_string, TextType.PLAIN_TEXT))
+    return new_nodes
+
+def split_nodes_link(old_nodes):
+    new_nodes = []
+    for node in old_nodes:
+        if node.text_type != TextType.PLAIN_TEXT:
+            new_nodes.append(node)
+            continue
+        image_meta_data = extract_markdown_links(node.text)
+        if not image_meta_data:
+            new_nodes.append(node)
+            continue
+        next_string = node.text
+        for image in image_meta_data:
+            split_node = next_string.split(f"[{image[0]}]({image[1]})", maxsplit=1)
+            next_string = split_node[1]
+            if split_node[0] != "":
+                new_nodes.append(TextNode(split_node[0], TextType.PLAIN_TEXT))
+            new_nodes.append(TextNode(image[0], TextType.LINK, image[1]))
+        if next_string and next_string != "":
+            new_nodes.append(TextNode(next_string, TextType.PLAIN_TEXT))
+    return new_nodes
