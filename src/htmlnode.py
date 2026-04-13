@@ -8,6 +8,7 @@ class HTMLNode():
     def to_html(self):
         raise NotImplementedError
     
+    #this string returns the props of a tag (e.g. href of a link)
     def props_to_html(self):
         temp_string = ""
         if self.props is None:
@@ -19,11 +20,14 @@ class HTMLNode():
     
     def __repr__(self):
         return f"Current Node:\ntag = {self.tag}\nvalue = {self.value}\nchildren = {self.children}\nprops = {self.props_to_html()}"
-    
+
+
+#this class is for the final nodes within a block of MD that has no additional internal HTML tags
 class LeafNode(HTMLNode):
     def __init__(self, tag, value, props=None):
         super().__init__(tag, value, None, props)
 
+    #this function returns a string of HTML code
     def to_html(self):
         if self.value is None:
             raise ValueError("Missing node value")
@@ -34,10 +38,12 @@ class LeafNode(HTMLNode):
     def __repr__(self):
         return f"Current Node:\ntag = {self.tag}\nvalue = {self.value}\nprops = {self.props_to_html()}"
 
+#this class has children (or internal LeafNodes) that will be encapsulated in this Node's tag
 class ParentNode(HTMLNode):
     def __init__(self, tag, children, props=None):
         super().__init__(tag, None, children, props)
 
+    #this function returns a string of HTML code including children nodes
     def to_html(self):
         if self.tag is None:
             raise ValueError("Missing tag value")

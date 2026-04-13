@@ -23,7 +23,8 @@ class TextNode():
         
     def __repr__(self):
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
-    
+
+#this function formats a standard TextNode into a LeafNode   
 def text_node_to_html(text_node):
     match text_node.text_type:
         case TextType.PLAIN_TEXT:

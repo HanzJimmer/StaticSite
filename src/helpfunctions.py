@@ -1,6 +1,11 @@
 from textnode import TextType, TextNode
 import re
+from enum import Enum
 
+# this function takes a list of nodes, a delimiter, and text_type enum 
+# and returns the a new list of TextNodes with their type
+# (used for bold, italic, and code blocks)
+# helper function in text_to_nodes
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
     for node in old_nodes:
@@ -19,14 +24,14 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                 new_nodes.append(TextNode(text_list[i], text_type))
     return new_nodes
 
+# helper function for split_nodes_image
 def extract_markdown_images(text):
     tuple_list = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return tuple_list
-    
-def extract_markdown_links(text):
-    tuple_list = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
-    return tuple_list
 
+# function takes a list of nodes and returns a new list
+# that includes TextNodes with IMAGE blocks
+# helper function in text_to_nodes
 def split_nodes_image(old_nodes):
     new_nodes = []
     for node in old_nodes:
@@ -48,6 +53,14 @@ def split_nodes_image(old_nodes):
             new_nodes.append(TextNode(next_string, TextType.PLAIN_TEXT))
     return new_nodes
 
+# helper function for split_nodes_link
+def extract_markdown_links(text):
+    tuple_list = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+    return tuple_list
+
+# function takes a list of nodes and returns a new list
+# that includes TextNodes with LINK blocks 
+# helper function in text_to_nodes
 def split_nodes_link(old_nodes):
     new_nodes = []
     for node in old_nodes:
@@ -68,3 +81,57 @@ def split_nodes_link(old_nodes):
         if next_string and next_string != "":
             new_nodes.append(TextNode(next_string, TextType.PLAIN_TEXT))
     return new_nodes
+
+# takes a string of text (i.e. a MD block) and returns the block as a list of TextNodes
+# this will be used for 
+def text_to_nodes(text):    
+    final_nodes = [TextNode(text, TextType.PLAIN_TEXT)]
+    final_nodes = split_nodes_delimiter(final_nodes, "**", TextType.BOLD_TEXT)
+    final_nodes = split_nodes_delimiter(final_nodes, "_", TextType.ITALIC_TEXT)
+    final_nodes = split_nodes_delimiter(final_nodes, "`", TextType.CODE_TEXT)
+    final_nodes = split_nodes_image(final_nodes)
+    final_nodes = split_nodes_link(final_nodes)
+    return final_nodes
+
+def markdown_to_blocks(markdown):
+    blocked_strings = markdown.split("\n\n")
+    final_blocks = []
+    for block in blocked_strings:
+        block_text = block.strip()
+        if block_text:
+            final_blocks.append(block_text)
+    return final_blocks
+
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered list"
+    ORDERED_LIST = "ordered list"
+
+def block_to_block_type(block):
+    lines = block.split("\n")
+
+    if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
+        return BlockType.HEADING
+    if len(lines) > 1 and lines[0].startswith("```") and lines[-1].startswith("```"):
+        return BlockType.CODE
+    if block.startswith(">"):
+        for line in lines:
+            if not line.startswith(">"):
+                return BlockType.PARAGRAPH
+        return BlockType.QUOTE
+    if block.startswith("- "):
+        for line in lines:
+            if not line.startswith("- "):
+                return BlockType.PARAGRAPH
+        return BlockType.UNORDERED_LIST
+    if block.startswith("1. "):
+        i = 1
+        for line in lines:
+            if not line.startswith(f"{i}. "):
+                return BlockType.PARAGRAPH
+            i += 1
+        return BlockType.ORDERED_LIST
+    return BlockType.PARAGRAPH
