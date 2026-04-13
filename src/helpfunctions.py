@@ -83,7 +83,8 @@ def split_nodes_link(old_nodes):
     return new_nodes
 
 # takes a string of text (i.e. a MD block) and returns the block as a list of TextNodes
-# this will be used for 
+# the returned list will be used in 
+# (need to write) a function to format each node on its TextType
 def text_to_nodes(text):    
     final_nodes = [TextNode(text, TextType.PLAIN_TEXT)]
     final_nodes = split_nodes_delimiter(final_nodes, "**", TextType.BOLD_TEXT)
@@ -93,6 +94,8 @@ def text_to_nodes(text):
     final_nodes = split_nodes_link(final_nodes)
     return final_nodes
 
+# takes a markdown file and returns it split into blocks
+# use in conjuntion with block_to_block_type
 def markdown_to_blocks(markdown):
     blocked_strings = markdown.split("\n\n")
     final_blocks = []
@@ -110,6 +113,8 @@ class BlockType(Enum):
     UNORDERED_LIST = "unordered list"
     ORDERED_LIST = "ordered list"
 
+# this takes a block (e.g. from markdown_to_blocks) and returns the type of block it is
+# use in conjunction with
 def block_to_block_type(block):
     lines = block.split("\n")
 
