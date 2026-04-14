@@ -84,7 +84,7 @@ def split_nodes_link(old_nodes):
 
 # takes a string of text (i.e. a MD block) and returns the block as a list of TextNodes
 # the returned list will be used in 
-# (need to write) a function to format each node on its TextType
+# need to write a function that strips MD syntax within a TextNode to pass into this
 def text_to_nodes(text):    
     final_nodes = [TextNode(text, TextType.PLAIN_TEXT)]
     final_nodes = split_nodes_delimiter(final_nodes, "**", TextType.BOLD_TEXT)
@@ -114,7 +114,7 @@ class BlockType(Enum):
     ORDERED_LIST = "ordered list"
 
 # this takes a block (e.g. from markdown_to_blocks) and returns the type of block it is
-# use in conjunction with
+# used in get_html_tag 
 def block_to_block_type(block):
     lines = block.split("\n")
 
@@ -140,3 +140,42 @@ def block_to_block_type(block):
             i += 1
         return BlockType.ORDERED_LIST
     return BlockType.PARAGRAPH
+
+# This takes a block's text and returns string value 
+# of the block's tag for use in HTMLNode creation 
+def get_html_tag(block_text):
+    block_type = block_to_block_type(block_text)
+    match block_type:
+        case BlockType.HEADING:
+            if block_text.startswith("# "):
+                return "h1"
+            elif block_text.startswith("## "):
+                return "h2"
+            elif block_text.startswith("### "):
+                return "h3"
+            elif block_text.startswith("#### "):
+                return "h4"
+            elif block_text.startswith("##### "):
+                return "h5"
+            elif block_text.startswith("###### "):
+                return "h6"
+        case BlockType.CODE:
+            return "code"
+        case BlockType.QUOTE:
+            return "blockquote"
+        case BlockType.UNORDERED_LIST:
+            return "ul"
+        case BlockType.ORDERED_LIST:
+            return "ol"
+        case BlockType.PARAGRAPH:
+            return "p"
+
+# This takes a line from a block and returns the 
+def strip_markdown_prefix(line, type):
+
+
+def markdown_to_html_node(markdown_text):
+    md_blocks = markdown_to_blocks(markdown_text)
+    blocks_with_type = []
+    for block in md_blocks:
+        blocks_with_type.append((block, block_to_block_type(block)))
