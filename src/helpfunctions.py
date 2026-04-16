@@ -170,12 +170,19 @@ def get_html_tag(block_text):
         case BlockType.PARAGRAPH:
             return "p"
 
-# This takes a line from a block and returns the 
+# This takes a line from a block and returns the string without markdown leading chars
 def strip_markdown_prefix(line, type):
 
 
-def markdown_to_html_node(markdown_text):
+def markdown_to_html_node(markdown_text): 
     md_blocks = markdown_to_blocks(markdown_text)
     blocks_with_type = []
     for block in md_blocks:
-        blocks_with_type.append((block, block_to_block_type(block)))
+        split_block = block.split("\n")
+        #write a function that can take the block (or split block) and will return the TextNode
+    #then we'll need to append that onto a list of all nodes
+    #then run that list of nodes through text to nodes to turn them into HTMLNodes
+    return
+
+#We will also need a final function to print to HTML coding
+             
