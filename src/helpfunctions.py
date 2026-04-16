@@ -83,8 +83,6 @@ def split_nodes_link(old_nodes):
     return new_nodes
 
 # takes a string of text (i.e. a MD block) and returns the block as a list of TextNodes
-# the returned list will be used in 
-# need to write a function that strips MD syntax within a TextNode to pass into this
 def text_to_nodes(text):    
     final_nodes = [TextNode(text, TextType.PLAIN_TEXT)]
     final_nodes = split_nodes_delimiter(final_nodes, "**", TextType.BOLD_TEXT)
@@ -94,8 +92,7 @@ def text_to_nodes(text):
     final_nodes = split_nodes_link(final_nodes)
     return final_nodes
 
-# takes a markdown file and returns it split into blocks
-# use in conjuntion with block_to_block_type
+# takes a markdown file and returns it split into a list of blocks
 def markdown_to_blocks(markdown):
     blocked_strings = markdown.split("\n\n")
     final_blocks = []
@@ -170,19 +167,35 @@ def get_html_tag(block_text):
         case BlockType.PARAGRAPH:
             return "p"
 
-# This takes a line from a block and returns the string without markdown leading chars
-def strip_markdown_prefix(line, type):
-
-
 def markdown_to_html_node(markdown_text): 
     md_blocks = markdown_to_blocks(markdown_text)
+    parent_blocks = []
+    #for each block
+        #parent_blocks.append(ParentBlock(block_to_blocktype(block), None, text_to_children()))
+        #strip the MD and run it through a text_to_children function
+
+
+
+
+
+
+
+
+
+
+
     blocks_with_type = []
     for block in md_blocks:
         split_block = block.split("\n")
-        #write a function that can take the block (or split block) and will return the TextNode
+        #run each line through strip markdown
+        #join list on \n
+        #write a function that can take the block  and will return the TextNode
     #then we'll need to append that onto a list of all nodes
     #then run that list of nodes through text to nodes to turn them into HTMLNodes
     return
 
-#We will also need a final function to print to HTML coding
+#also need a final function to print to HTML coding (will "for each node in list, use to_html()" work for this?)
              
+# This takes a text block and returns the string without markdown leading chars
+def strip_markdown_prefix(block, type):
+    pass

@@ -38,7 +38,7 @@ class LeafNode(HTMLNode):
     def __repr__(self):
         return f"Current Node:\ntag = {self.tag}\nvalue = {self.value}\nprops = {self.props_to_html()}"
 
-#this class has children (or internal LeafNodes) that will be encapsulated in this Node's tag
+#this class has children (or internal LeafNodes) that will be encapsulated in this Node's tag when converted to HTML
 class ParentNode(HTMLNode):
     def __init__(self, tag, children, props=None):
         super().__init__(tag, None, children, props)
