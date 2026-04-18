@@ -171,30 +171,9 @@ def markdown_to_html_node(markdown_text):
     md_blocks = markdown_to_blocks(markdown_text)
     parent_blocks = []
     #for each block
-        #parent_blocks.append(ParentBlock(block_to_blocktype(block), None, text_to_children()))
-        #strip the MD and run it through a text_to_children function
+        #strip the MD
+        #parent_blocks.append(ParentBlock(block_to_blocktype(block), None, text_to_children(stripped_block))
 
-
-
-
-
-
-
-
-
-
-
-    blocks_with_type = []
-    for block in md_blocks:
-        split_block = block.split("\n")
-        #run each line through strip markdown
-        #join list on \n
-        #write a function that can take the block  and will return the TextNode
-    #then we'll need to append that onto a list of all nodes
-    #then run that list of nodes through text to nodes to turn them into HTMLNodes
-    return
-
-#also need a final function to print to HTML coding (will "for each node in list, use to_html()" work for this?)
              
 # This takes a text block and returns the string without markdown leading chars
 def strip_markdown_prefix(block, type):
