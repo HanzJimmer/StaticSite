@@ -1,4 +1,5 @@
 from textnode import TextType, TextNode
+from htmlnode import ParentNode
 import re
 from enum import Enum
 
@@ -111,7 +112,6 @@ class BlockType(Enum):
     ORDERED_LIST = "ordered list"
 
 # this takes a block (e.g. from markdown_to_blocks) and returns the type of block it is
-# used in get_html_tag 
 def block_to_block_type(block):
     lines = block.split("\n")
 
@@ -166,15 +166,49 @@ def get_html_tag(block_text):
             return "ol"
         case BlockType.PARAGRAPH:
             return "p"
+             
+# This takes a text block and returns the string without markdown leading chars
+def strip_markdown_prefix(block, type):
+        match type:
+            case BlockType.HEADING:
+                if block.startswith("# "):
+                    return "h1"
+                elif block.startswith("## "):
+                    return "h2"
+                elif block.startswith("### "):
+                    return "h3"
+                elif block.startswith("#### "):
+                    return "h4"
+                elif block.startswith("##### "):
+                    return "h5"
+                elif block.startswith("###### "):
+                    return "h6"
+            case BlockType.CODE:
+                return "code"
+            case BlockType.QUOTE:
+                return "blockquote"
+            case BlockType.UNORDERED_LIST:
+                return "ul"
+            case BlockType.ORDERED_LIST:
+                return "ol"
+            case BlockType.PARAGRAPH:
+                return "p"
+
+def text_to_children(text):
+    split_text = text.split("\n")
+    node_list = []
+    for line in split_text:
+        node_list.append(text_to_nodes(line))
+    return node_list
 
 def markdown_to_html_node(markdown_text): 
     md_blocks = markdown_to_blocks(markdown_text)
     parent_blocks = []
-    #for each block
-        #strip the MD
-        #parent_blocks.append(ParentBlock(block_to_blocktype(block), None, text_to_children(stripped_block))
+    for block in md_blocks:
+        block_type = block_to_block_type(block)
+        text = strip_markdown_prefix(block, block_type)
+        parent_blocks.append(ParentNode(get_html_tag(block), None, text_to_children(text)))
+    return ParentNode("div", None, parent_blocks)
 
-             
-# This takes a text block and returns the string without markdown leading chars
-def strip_markdown_prefix(block, type):
-    pass
+def html_node_to_html(top_node):
+    return top_node.to_html()
