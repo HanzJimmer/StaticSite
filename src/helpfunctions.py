@@ -1,4 +1,4 @@
-from textnode import TextType, TextNode
+from textnode import TextType, TextNode, text_node_to_html_node
 from htmlnode import ParentNode
 import re
 from enum import Enum
@@ -138,8 +138,7 @@ def block_to_block_type(block):
         return BlockType.ORDERED_LIST
     return BlockType.PARAGRAPH
 
-# This takes a block's text and returns string value 
-# of the block's tag for use in HTMLNode creation 
+# This takes a block's text and returns string value of the block's tag for use in HTMLNode creation 
 def get_html_tag(block_text):
     block_type = block_to_block_type(block_text)
     match block_type:
@@ -167,47 +166,64 @@ def get_html_tag(block_text):
         case BlockType.PARAGRAPH:
             return "p"
              
-# This takes a text block and returns the string without markdown leading chars
-def strip_markdown_prefix(block, type):
-        match type:
-            case BlockType.HEADING:
-                if block.startswith("# "):
-                    return "h1"
-                elif block.startswith("## "):
-                    return "h2"
-                elif block.startswith("### "):
-                    return "h3"
-                elif block.startswith("#### "):
-                    return "h4"
-                elif block.startswith("##### "):
-                    return "h5"
-                elif block.startswith("###### "):
-                    return "h6"
-            case BlockType.CODE:
-                return "code"
-            case BlockType.QUOTE:
-                return "blockquote"
-            case BlockType.UNORDERED_LIST:
-                return "ul"
-            case BlockType.ORDERED_LIST:
-                return "ol"
-            case BlockType.PARAGRAPH:
-                return "p"
+# this will be a series of functions to call based on blocktype
+def heading_to_html_node(block):
+    tag = get_html_tag(block)
+    text = block.lstrip("#").lstrip()
+    node_list = text_to_nodes(text)
+    return ParentNode(tag, node_list)
 
+def paragraph_to_html_node(block):
+    tag = get_html_tag(block)
+    text = block.replace("\n", " ")
+    node_list = text_to_nodes(text)
+    return ParentNode(tag, node_list)
+
+def code_to_html_node(block):
+    tag = get_html_tag(block)
+    #need to strip the ``` characters from beginning and end and then return a TextNode run through text_node_to_html_node 
+    # text = block.lstrip("#").lstrip()
+    #node_list = text_to_nodes(text)
+    #return ParentNode(tag, node_list)
+    pass
+
+def quote_to_html_node(block):
+    pass
+
+def ul_to_html_node(block):
+    pass
+
+def ol_to_html_node(block):
+    pass
+
+# takes the md text and returns HTML node list used as children for parent node
 def text_to_children(text):
-    split_text = text.split("\n")
-    node_list = []
-    for line in split_text:
-        node_list.append(text_to_nodes(line))
-    return node_list
+    text_node_list = text_to_nodes(text)
+    html_node_list = []
+    for node in text_node_list:
+        html_node_list.append(text_node_to_html_node(node))
+    return html_node_list
 
 def markdown_to_html_node(markdown_text): 
     md_blocks = markdown_to_blocks(markdown_text)
     parent_blocks = []
     for block in md_blocks:
         block_type = block_to_block_type(block)
-        text = strip_markdown_prefix(block, block_type)
-        parent_blocks.append(ParentNode(get_html_tag(block), None, text_to_children(text)))
+        if block_type == BlockType.HEADING:
+            node = None
+        elif block_type == BlockType.CODE:
+            node = None
+        elif block_type == BlockType.PARAGRAPH:
+            node = None
+        elif block_type == BlockType.QUOTE:
+            node = None
+        elif block_type == BlockType.UNORDERED_LIST:
+            node = None
+        elif block_type == BlockType.ORDERED_LIST:
+            node = None
+        else:
+            continue
+        parent_blocks.append(node)
     return ParentNode("div", None, parent_blocks)
 
 def html_node_to_html(top_node):
