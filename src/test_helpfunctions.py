@@ -35,9 +35,49 @@ the **same** even with inline stuff
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
 
+    def test_ul_and_headings(self):
+        md = """
+- this is an unordered list
+- with two different items in the list
 
+## Followed by a _level 2_ heading
+"""
 
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><ul><li>this is an unordered list</li><li>with two different items in the list</li></ul><h2>Followed by a <i>level 2</i> heading</h2></div>",
+        )
 
+    def test_ol_and_quote(self):
+        md = """
+1. this is an ordered list
+2. with two different items in the list
+
+> Now I will enter a quote
+> by Wayne Gretzky
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><ol><li>this is an ordered list</li><li>with two different items in the list</li></ol><blockquote>Now I will enter a quote by Wayne Gretzky</blockquote></div>",
+        )
+
+    def test_para_with_link(self):
+        md = """
+This is a paragraph with a [link](www.google.com)
+but some is **bolded text**
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            '<div><p>This is a paragraph with a <a href="www.google.com">link</a> but some is <b>bolded text</b></p></div>'
+        )
 
 # class TestDelimiterParser(unittest.TestCase):
 #     def test_code_delimiter(self):

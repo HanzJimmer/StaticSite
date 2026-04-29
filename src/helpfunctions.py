@@ -170,31 +170,44 @@ def get_html_tag(block_text):
 def heading_to_html_node(block):
     tag = get_html_tag(block)
     text = block.lstrip("#").lstrip()
-    node_list = text_to_nodes(text)
+    node_list = text_to_children(text)
     return ParentNode(tag, node_list)
 
 def paragraph_to_html_node(block):
     tag = get_html_tag(block)
     text = block.replace("\n", " ")
-    node_list = text_to_nodes(text)
+    node_list = text_to_children(text)
     return ParentNode(tag, node_list)
 
 def code_to_html_node(block):
     tag = get_html_tag(block)
-    #need to strip the ``` characters from beginning and end and then return a TextNode run through text_node_to_html_node 
-    # text = block.lstrip("#").lstrip()
-    #node_list = text_to_nodes(text)
-    #return ParentNode(tag, node_list)
-    pass
+    split_text = block.split("\n")
+    split_text = split_text[1:-1]
+    text = "\n".join(split_text) + "\n"
+    text_node = TextNode(text, TextType.PLAIN_TEXT)
+    code_node = ParentNode(tag, [text_node_to_html_node(text_node)])
+    return ParentNode("pre", [code_node])
 
 def quote_to_html_node(block):
-    pass
+    tag = get_html_tag(block)
+    split_text = block.split("\n")
+    cleaned_text = [line.lstrip(">").lstrip() for line in split_text]
+    joined_text = " ".join(cleaned_text)
+    node_list = text_to_children(joined_text)
+    return ParentNode(tag, node_list)
 
-def ul_to_html_node(block):
-    pass
-
-def ol_to_html_node(block):
-    pass
+def list_to_html_node(block):
+    tag = get_html_tag(block)
+    block_type = block_to_block_type(block)
+    split_text = block.split("\n")
+    li_children = []
+    if block_type == BlockType.UNORDERED_LIST:
+        cleaned_text = [line.removeprefix("- ") for line in split_text]
+    elif block_type == BlockType.ORDERED_LIST:
+        cleaned_text = [line.split(". ", 1)[1] for line in split_text]
+    for clean_line in cleaned_text:
+        li_children.append(ParentNode("li", text_to_children(clean_line)))
+    return ParentNode(tag, li_children)
 
 # takes the md text and returns HTML node list used as children for parent node
 def text_to_children(text):
@@ -210,21 +223,14 @@ def markdown_to_html_node(markdown_text):
     for block in md_blocks:
         block_type = block_to_block_type(block)
         if block_type == BlockType.HEADING:
-            node = None
+            node = heading_to_html_node(block)
         elif block_type == BlockType.CODE:
-            node = None
+            node = code_to_html_node(block)
         elif block_type == BlockType.PARAGRAPH:
-            node = None
+            node = paragraph_to_html_node(block)
         elif block_type == BlockType.QUOTE:
-            node = None
-        elif block_type == BlockType.UNORDERED_LIST:
-            node = None
-        elif block_type == BlockType.ORDERED_LIST:
-            node = None
-        else:
-            continue
+            node = quote_to_html_node(block)
+        elif block_type == BlockType.UNORDERED_LIST or block_type == BlockType.ORDERED_LIST:
+            node = list_to_html_node(block)
         parent_blocks.append(node)
-    return ParentNode("div", None, parent_blocks)
-
-def html_node_to_html(top_node):
-    return top_node.to_html()
+    return ParentNode("div", parent_blocks)
