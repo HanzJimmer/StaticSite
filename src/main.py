@@ -1,20 +1,28 @@
-from textnode import TextNode, TextType
 import os
 import shutil
 
 def main():
-    Node1 = TextNode("This is my text", TextType.PLAIN_TEXT)
-    print(Node1)
+    static_path = "static"
+    public_path = "public"
+    copy_static(static_path, public_path)
 
 def copy_static(src, dest):
-    dest_address = dest
-    shutil.rmtree(dest)
-    os.mkdir(dest_address)
+    if os.path.exists(dest):
+        shutil.rmtree(dest)
+    os.mkdir(dest)
+
     copy_list = os.listdir(src)
     for item in copy_list:
-        shutil.copy(src, dest)
-        if os.path.isdir(item):
-            os.mkdir(item) #need to edit this to create new dir in the correct filepath
-            copy_static(item, )
+        new_src = os.path.join(src, item)
+        new_dest = os.path.join(dest, item)
+        if os.path.isdir(new_src):
+            os.mkdir(new_dest)
+            copy_static(new_src, new_dest)
+        else:
+            shutil.copy(new_src, new_dest)
+
+def extract_title(markdown):
+    if not markdown.startswith("# "):
+        raise Exception
 
 main()
